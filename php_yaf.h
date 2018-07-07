@@ -17,6 +17,9 @@
 #ifndef PHP_YAF_H
 #define PHP_YAF_H
 
+#include <php.h>
+
+
 extern zend_module_entry yaf_module_entry;
 #define phpext_yaf_ptr &yaf_module_entry
 
@@ -68,6 +71,9 @@ extern zend_module_entry yaf_module_entry;
 extern PHPAPI void php_var_dump(zval **struc, int level);
 extern PHPAPI void php_debug_zval_dump(zval **struc, int level);
 
+/**
+ * 定义全局变量结构体
+ */
 ZEND_BEGIN_MODULE_GLOBALS(yaf)
 	zend_string	*ext;
 	zend_string *base_uri;
@@ -113,6 +119,9 @@ PHP_RINIT_FUNCTION(yaf);
 PHP_RSHUTDOWN_FUNCTION(yaf);
 PHP_MINFO_FUNCTION(yaf);
 
+/**
+ * 创建全局变量结构体
+ */
 extern ZEND_DECLARE_MODULE_GLOBALS(yaf);
 
 #endif

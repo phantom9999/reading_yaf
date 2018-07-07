@@ -38,33 +38,46 @@ zend_class_entry *yaf_action_ce;
 
 /** {{{ proto public Yaf_Action_Abstract::getController(void)
 */
-PHP_METHOD(yaf_action, getController) {
-	yaf_controller_t *controller = zend_read_property(yaf_action_ce,
-			getThis(), ZEND_STRL(YAF_ACTION_PROPERTY_NAME_CTRL), 1, NULL);
-	RETURN_ZVAL(controller, 1, 0);
+PHP_METHOD (yaf_action, getController) {
+    yaf_controller_t * controller = zend_read_property(yaf_action_ce,
+                                                       getThis(),
+                                                       ZEND_STRL(
+                                                           YAF_ACTION_PROPERTY_NAME_CTRL),
+                                                       1,
+                                                       NULL);
+    RETURN_ZVAL(controller, 1, 0);
 }
 /* }}} */
 
 /** {{{ yaf_controller_methods
 */
 zend_function_entry yaf_action_methods[] = {
-	PHP_ABSTRACT_ME(yaf_action_controller, execute, NULL)
-	PHP_ME(yaf_action, getController, NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+    PHP_ABSTRACT_ME(yaf_action_controller, execute, NULL)
+    PHP_ME(yaf_action, getController, NULL, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
 };
 /* }}} */
 
 /** {{{ YAF_STARTUP_FUNCTION
 */
 YAF_STARTUP_FUNCTION(action) {
-	zend_class_entry ce;
-	YAF_INIT_CLASS_ENTRY(ce, "Yaf_Action_Abstract", "Yaf\\Action_Abstract", yaf_action_methods);
-	yaf_action_ce = zend_register_internal_class_ex(&ce, yaf_controller_ce);
-	yaf_action_ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+    zend_class_entry ce;
+    // 类注册
+    YAF_INIT_CLASS_ENTRY(ce,
+                         "Yaf_Action_Abstract",
+                         "Yaf\\Action_Abstract",
+                         yaf_action_methods);
+    // 添加为controller的子类
+    yaf_action_ce = zend_register_internal_class_ex(&ce, yaf_controller_ce);
+    // 设置为抽象类
+    yaf_action_ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 
-	zend_declare_property_null(yaf_action_ce, ZEND_STRL(YAF_ACTION_PROPERTY_NAME_CTRL),	ZEND_ACC_PROTECTED);
+    // 添加属性 _controller
+    zend_declare_property_null(yaf_action_ce,
+                               ZEND_STRL(YAF_ACTION_PROPERTY_NAME_CTRL),
+                               ZEND_ACC_PROTECTED);
 
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 

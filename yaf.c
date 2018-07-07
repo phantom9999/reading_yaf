@@ -47,13 +47,25 @@ ZEND_DECLARE_MODULE_GLOBALS(yaf);
 
 /* {{{ yaf_functions[]
 */
+/**
+ * 空
+ */
 zend_function_entry yaf_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /** {{{ PHP_INI_MH(OnUpdateSeparator)
- */
+ *
+  * 自定义ini配置解析哈数
+  * @param entry
+  * @param new_value
+  * @param mh_arg1
+  * @param mh_arg2
+  * @param mh_arg3
+  * @param stage
+  * @return
+  */
 PHP_INI_MH(OnUpdateSeparator) {
 	YAF_G(name_separator) = ZSTR_VAL(new_value);
 	YAF_G(name_separator_len) = ZSTR_LEN(new_value);
@@ -62,6 +74,7 @@ PHP_INI_MH(OnUpdateSeparator) {
 /* }}} */
 
 /** {{{ PHP_INI
+ * 配置文件解析
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("yaf.library",         	"",  PHP_INI_ALL, OnUpdateString, global_library, zend_yaf_globals, yaf_globals)
@@ -80,6 +93,7 @@ PHP_INI_END();
 /* }}} */
 
 /** {{{ PHP_GINIT_FUNCTION
+ * 针对全局变量的初始化函数
 */
 PHP_GINIT_FUNCTION(yaf)
 {
@@ -89,11 +103,20 @@ PHP_GINIT_FUNCTION(yaf)
 
 /** {{{ PHP_MINIT_FUNCTION
 */
+/**
+ * 模块初始化函数
+ * @param type
+ * @param module_number
+ * @return
+ */
 PHP_MINIT_FUNCTION(yaf)
 {
+	// 注册配置文件
 	REGISTER_INI_ENTRIES();
 
+	// 判断是否使用名字空间
 	if (YAF_G(use_namespace)) {
+		// 名字空间相关
 
 		REGISTER_STRINGL_CONSTANT("YAF\\VERSION", PHP_YAF_VERSION, 	sizeof(PHP_YAF_VERSION) - 1, CONST_PERSISTENT | CONST_CS);
 		REGISTER_STRINGL_CONSTANT("YAF\\ENVIRON", YAF_G(environ_name), strlen(YAF_G(environ_name)), CONST_PERSISTENT | CONST_CS);
@@ -110,6 +133,7 @@ PHP_MINIT_FUNCTION(yaf)
 		REGISTER_LONG_CONSTANT("YAF\\ERR\\TYPE_ERROR",			YAF_ERR_TYPE_ERROR, CONST_PERSISTENT | CONST_CS);
 
 	} else {
+		// 通过下划线完成
 		REGISTER_STRINGL_CONSTANT("YAF_VERSION", PHP_YAF_VERSION, 	sizeof(PHP_YAF_VERSION) - 1, 	CONST_PERSISTENT | CONST_CS);
 		REGISTER_STRINGL_CONSTANT("YAF_ENVIRON", YAF_G(environ_name),strlen(YAF_G(environ_name)), 	CONST_PERSISTENT | CONST_CS);
 
@@ -126,6 +150,7 @@ PHP_MINIT_FUNCTION(yaf)
 	}
 
 	/* startup components */
+    // 添加组件, 相对于常规的方法更加方便
 	YAF_STARTUP(application);
 	YAF_STARTUP(bootstrap);
 	YAF_STARTUP(dispatcher);
@@ -148,6 +173,12 @@ PHP_MINIT_FUNCTION(yaf)
 
 /** {{{ PHP_MSHUTDOWN_FUNCTION
 */
+/**
+ * 模块结束的函数, 销毁全局变量
+ * @param type
+ * @param module_number
+ * @return
+ */
 PHP_MSHUTDOWN_FUNCTION(yaf)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -163,6 +194,13 @@ PHP_MSHUTDOWN_FUNCTION(yaf)
 
 /** {{{ PHP_RINIT_FUNCTION
 */
+/**
+ * 请求初始化函数
+ * 重新初始化全局部分全局参数
+ * @param type
+ * @param module_number
+ * @return
+ */
 PHP_RINIT_FUNCTION(yaf)
 {
 	YAF_G(throw_exception) = 1;
@@ -180,6 +218,13 @@ PHP_RINIT_FUNCTION(yaf)
 
 /** {{{ PHP_RSHUTDOWN_FUNCTION
 */
+/**
+ * 请求结束函数
+ *
+ * @param type
+ * @param module_number
+ * @return
+ */
 PHP_RSHUTDOWN_FUNCTION(yaf)
 {
 	YAF_G(running) = 0;
@@ -237,6 +282,10 @@ PHP_RSHUTDOWN_FUNCTION(yaf)
 
 /** {{{ PHP_MINFO_FUNCTION
 */
+/**
+ * phpinfo函数显示
+ * @param zend_module
+ */
 PHP_MINFO_FUNCTION(yaf)
 {
 	php_info_print_table_start();
@@ -264,6 +313,9 @@ ZEND_GET_MODULE(yaf)
 /** {{{ module depends
  */
 #if ZEND_MODULE_API_NO >= 20050922
+/**
+ * 添加模块依赖
+ */
 zend_module_dep yaf_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_REQUIRED("pcre")
@@ -274,6 +326,7 @@ zend_module_dep yaf_deps[] = {
 /* }}} */
 
 /** {{{ yaf_module_entry
+ * 创建模块对象
 */
 zend_module_entry yaf_module_entry = {
 #if ZEND_MODULE_API_NO >= 20050922

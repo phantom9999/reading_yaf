@@ -18,7 +18,9 @@
 #include "config.h"
 #endif
 
+#include <zend_types.h>
 #include "php.h"
+
 #include "Zend/zend_interfaces.h" /* for zend_call_method_with_* */
 
 #include "php_yaf.h"
@@ -72,6 +74,14 @@ ZEND_BEGIN_ARG_INFO_EX(yaf_controller_display_arginfo, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
+/**
+ * 根据参数生成模板的路径, 然后调用对应的view的reader函数进行渲染
+ * @param instance
+ * @param action_name
+ * @param len
+ * @param var_array
+ * @return
+ */
 zend_string * yaf_controller_render(yaf_controller_t *instance, char *action_name, int len, zval *var_array) /* {{{ */ {
 	char *self_name, *tmp;
 	zval *name, param, ret;
@@ -104,7 +114,7 @@ zend_string * yaf_controller_render(yaf_controller_t *instance, char *action_nam
 		}
 		tmp++;
 	}
-
+    // _name / action .tpl
 	path = strpprintf(0, "%s%c%s.%s", self_name, DEFAULT_SLASH, action_name, ZSTR_VAL(view_ext));
 
 	efree(self_name);
@@ -114,8 +124,10 @@ zend_string * yaf_controller_render(yaf_controller_t *instance, char *action_nam
 
 	view_ce = Z_OBJCE_P(view);
 	if (var_array) {
+	    // 函数调用
 		zend_call_method_with_2_params(view, view_ce, NULL, "render", &ret, &param, var_array);
 	} else {
+	    // 调用类的函数
 		zend_call_method_with_1_params(view, view_ce, NULL, "render", &ret, &param);
 	}
 	
@@ -141,6 +153,14 @@ zend_string * yaf_controller_render(yaf_controller_t *instance, char *action_nam
 
 /** {{{ int yaf_controller_display(yaf_controller_t *instance, char *action_name, int len, zval *var_array)
  */
+ /**
+  *
+  * @param instance
+  * @param action_name
+  * @param len
+  * @param var_array
+  * @return
+  */
 int yaf_controller_display(yaf_controller_t *instance, char *action_name, int len, zval *var_array) {
 	char *self_name, *tmp;
 	zval *name, param, ret;
@@ -543,8 +563,15 @@ zend_function_entry yaf_controller_methods[] = {
 
 /** {{{ YAF_STARTUP_FUNCTION
 */
+/**
+ * 定义startup函数
+ * @param type
+ * @param module_number
+ * @return
+ */
 YAF_STARTUP_FUNCTION(controller) {
 	zend_class_entry ce;
+	// 名字空间相关
 	YAF_INIT_CLASS_ENTRY(ce, "Yaf_Controller_Abstract", "Yaf\\Controller_Abstract", yaf_controller_methods);
 	yaf_controller_ce = zend_register_internal_class_ex(&ce, NULL);
 	yaf_controller_ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
